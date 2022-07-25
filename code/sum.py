@@ -13,7 +13,7 @@ import chardet
 import nltk
 imageio.plugins.ffmpeg.download()
 nltk.download('punkt')
-
+import json
 from moviepy.editor import VideoFileClip, concatenate_videoclips
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
@@ -150,16 +150,23 @@ def create_summary(filename, regions):
         VideoFileClip: joined subclips in segment
 
     """
+    import json
+    op_dict = {}
+    op_dict['Filename'] = str(filename)
     subclips = []
     input_video = VideoFileClip(filename)
     last_end = 0
-    for (start, end) in regions:
-        print(start)
-        print(end)
+    for i,(start, end) in enumerate(regions):
+        #print(start)
+        #print(end)
+
+        op_dict['Start - '+ str(i)] = start
+        op_dict["end - " + str(i)] = end
+        #print(op_dict)
         subclip = input_video.subclip(start, end)
         subclips.append(subclip)
         last_end = end
-    return concatenate_videoclips(subclips)
+    return concatenate_videoclips(subclips),op_dict
 
 
 def get_summary(filename="1.mp4", subtitles="1.srt"):
@@ -174,9 +181,15 @@ def get_summary(filename="1.mp4", subtitles="1.srt"):
 
     """
     regions = find_summary_regions(subtitles, 120, "english")
-    summary = create_summary(filename, regions)
+    summary,op_dict = create_summary(filename, regions)
     base, ext = os.path.splitext(filename)
     output = "{0}_1.mp4".format(base)
+
+    y = json.dumps(op_dict)
+    print(y)
+    with open('data.json', 'w', encoding='utf-8') as f:
+        print("JSON Made")
+        json.dump(y, f, ensure_ascii=False, indent=2)
     summary.to_videofile(
                 output,
                 codec="libx264",
