@@ -154,6 +154,8 @@ def create_summary(filename, regions):
     input_video = VideoFileClip(filename)
     last_end = 0
     for (start, end) in regions:
+        print(start)
+        print(end)
         subclip = input_video.subclip(start, end)
         subclips.append(subclip)
         last_end = end
@@ -171,7 +173,7 @@ def get_summary(filename="1.mp4", subtitles="1.srt"):
         True
 
     """
-    regions = find_summary_regions(subtitles, 60, "english")
+    regions = find_summary_regions(subtitles, 120, "english")
     summary = create_summary(filename, regions)
     base, ext = os.path.splitext(filename)
     output = "{0}_1.mp4".format(base)
@@ -212,7 +214,10 @@ def download_video_srt(subs):
         result = ydl.extract_info("{}".format(url), download=True)
         movie_filename = ydl.prepare_filename(result)
         subtitle_info = result.get("requested_subtitles")
-        subtitle_language = subtitle_info.keys()[0]
+        print(subtitle_info)
+        print(type(subtitle_info))
+        print("_____________________________________________________________--")
+        subtitle_language = list(subtitle_info.keys())[0]
         subtitle_ext = subtitle_info.get(subtitle_language).get("ext")
         subtitle_filename = movie_filename.replace(".mp4", ".%s.%s" %
                                                    (subtitle_language,
